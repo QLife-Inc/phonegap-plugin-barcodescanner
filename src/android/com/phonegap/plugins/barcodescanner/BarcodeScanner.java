@@ -351,7 +351,7 @@ public class BarcodeScanner extends CordovaPlugin {
      * Divided symbols can be reconstructed as a single data symbol using the same payload , the position number and total count.
      * @param rawBytes
      */
-    private JSONObject extractDividedQrMetaData(byte[] rawBytes) {
+    private static JSONObject extractDividedQrMetaData(byte[] rawBytes) {
         // QR Code meta default value.
         int qrMetaMode = 0;
         int qrMetaPosition = QR_META_DEFAULT_VALUE_POSITION;

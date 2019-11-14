@@ -259,7 +259,9 @@
     resultDict[@"format"] = format;
     resultDict[@"cancelled"] = cancelledNumber;
     // divided qr code meta data
-    resultDict[@"meta"] = metaData;
+    if (format == @"QR_CODE") {
+        resultDict[@"meta"] = metaData;
+    }
 
     CDVPluginResult* result = [CDVPluginResult
                                resultWithStatus: CDVCommandStatus_OK
@@ -654,39 +656,39 @@ parentViewController:(UIViewController*)parentViewController
 // Divided symbols can be reconstructed as a single data symbol using the same payload , the position number and total count.
 //--------------------------------------------------------------------------
 - (NSDictionary*) extractDividedQrMetaData:(AVMetadataMachineReadableCodeObject*)code {
-  // QR code meta data default values.
-  int qrmode = nil;
-  int position = 0;
-  int total = 1;
-  int parity = nil;
+    // QR code meta data default values.
+    int qrmode = nil;
+    int position = 0;
+    int total = 1;
+    int parity = nil;
     if (@available(iOS 11.0, *)) {
-         if (code.type == AVMetadataObjectTypeQRCode) {
-              CIQRCodeDescriptor *descriptor = (CIQRCodeDescriptor *)code.descriptor;
-              Byte bytes[3];
-              [descriptor.errorCorrectedPayload getBytes:bytes length:3];
-              // nibble masking
-              unsigned char nibbleMaskHigher = 0x0f;
-              unsigned char nibbleMaskLower = 0xf0;
-              // QRCode Mode
-              qrmode = (bytes[0] & nibbleMaskLower) >> 4;
-              // mode=3: divided QRCode is setup meta data
-              if ( qrmode == 3) {
+        if (code.type == AVMetadataObjectTypeQRCode) {
+            CIQRCodeDescriptor *descriptor = (CIQRCodeDescriptor *)code.descriptor;
+            Byte bytes[3];
+            [descriptor.errorCorrectedPayload getBytes:bytes length:3];
+            // nibble masking
+            unsigned char nibbleMaskHigher = 0x0f;
+            unsigned char nibbleMaskLower = 0xf0;
+            // QRCode Mode
+            qrmode = (bytes[0] & nibbleMaskLower) >> 4;
+            // mode=3: divided QRCode is setup meta data
+            if ( qrmode == 3) {
                 // QRCode Position No.(ex. 0..15)
                 position = bytes[0] & nibbleMaskHigher;
                 // divited QRCode total count.(up to 16)
                 total = ((bytes[1] & nibbleMaskLower) >> 4) + 1;
                 // parity.
                 parity = ((bytes[1] & nibbleMaskHigher) << 4) | ((bytes[2] & nibbleMaskHigher) >>4);
-              };
-         }
+            };
+        }
     }
     NSDictionary *dict = @{
-                              @"mode": @(qrmode),
-                              @"position": @(position),
-                              @"total": @(total),
-                              @"parity": @(parity)
-   };
-   return dict;
+        @"mode": @(qrmode),
+        @"position": @(position),
+        @"total": @(total),
+        @"parity": @(parity)
+    };
+    return dict;
 }
 
 @end
@@ -884,14 +886,14 @@ parentViewController:(UIViewController*)parentViewController
         return nil;
     }
 
-	self.overlayView.autoresizesSubviews = YES;
+    self.overlayView.autoresizesSubviews = YES;
     self.overlayView.autoresizingMask    = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.overlayView.opaque              = NO;
 
-	CGRect bounds = self.view.bounds;
+    CGRect bounds = self.view.bounds;
     bounds = CGRectMake(0, 0, bounds.size.width, bounds.size.height);
 
-	[self.overlayView setFrame:bounds];
+    [self.overlayView setFrame:bounds];
 
     return self.overlayView;
 }
